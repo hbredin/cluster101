@@ -53,6 +53,32 @@
     <img src="images/cluster.png" width=60%>
 </section>
 
+<section class="slide" id="configuration">
+    <h2>One installation to rule them all</h2>
+    <h3>System clones</h3>
+    <ul>
+        <li>Same operating system</li>
+        <li>Same libraries</li>
+        <li>Same mounted directories</li>
+    </ul>
+    <h3>Compile once</h3>
+    <ul>
+        <li>... and it should work on every host</li>
+        <li>Queue <code><strong>interactive.q</strong></code> is dedicated to compilation and quick test
+        <pre><code class="no-highlight"><strong>[m107:~]$ qlogin -q interactive.q</strong>
+Your job 1113695 ("QLOGIN") has been submitted
+waiting for interactive job to be scheduled ...
+Your interactive job 1113695 has been successfully scheduled.
+Establishing builtin session to host h-0-0.local ...
+</code></pre>
+<pre><code class="no-highlight"><strong>[h-0-0:~]$ cd source</strong>
+<strong>[h-0-0:source]$ make</strong>
+</code></pre>
+        </li>
+    </ul>
+</section>
+
+
 <section class="slide" id="what-it-is-not">
     <h2>What it's not...</h2>
 </section>
@@ -62,51 +88,165 @@
     <ul>
         <li>
             <h3>Hello world!</h3>
-            <pre><code class="bash"># hello_world.sh
+            <pre><code class="bash">#!/bin/bash
 echo "Hello world!"</code></pre>
-            <pre><code class="bash">$ qsub hello_world.sh</code></pre>
+            <pre><code class="bash"><strong>[m107:~]$ qsub -S /bin/bash hello_world.sh</strong>
+Your job 1113431 ("hello_world.sh") has been submitted</code></pre>
+            <pre><code class="bash"><strong>$ cat ~/hello_world.sh.o1113431</strong>
+Hello world!</code></pre>
         </li>
         <li>
             <h3>... with arguments</h3>
-            <pre><code class="bash"># hello_you.sh
-echo "Hello " $1</code></pre>
-            <pre><code class="bash">$ qsub hello_you.sh herve</code></pre>
+            <pre><code class="bash">#!/bin/bash
+echo "Hello" $1</code></pre>
+            <pre><code class="bash"><strong>[m107:~]$ qsub -S /bin/bash hello_you.sh Hervé</strong>
+Your job 1113442 ("hello_you.sh") has been submitted</code></pre>
+            <pre><code class="bash"><strong>$ cat ~/hello_you.sh.o1113442</strong>
+Hello Hervé</code></pre>
         </li>
     </ul>
 </section>
 
-<section class="slide" id="qstat">
-    <h2>Cluster and job status</h2>
+<section class="slide" id="qsub-details">
+    <h2>What just happened?</h2>
     <ul>
         <li>
-            <pre><code class="bash">$ qstat</code></pre>
-            <p>Only running jobs</p>
-            <pre><code class="bash">$ qstat -s r</code></pre>
-            <p>Other people jobs</p>
-            <pre><code class="bash">$ qstat -u "*"</code></pre>
+            <p><strong>You</strong>: "Please, run this script."</p>
+            <pre><code class="bash"><strong>[m107:~]$ qsub -S /bin/bash hello_world.sh</strong></code></pre>
         </li>
         <li>
+            <p><strong>Scheduler</strong>: "Got it. I put it in the queue."</p>
+            <pre><code class="no-highlight">Your job 1113431 ("hello_world.sh") has been submitted</code></pre>
         </li>
-    </ul>
+        <li>
+            <p><strong>You</strong>: "Tell me more."</br>
+            <strong>Scheduler</strong>: "Your job is waiting in the queue. I will launch it as soon as possible."</p>
+            <pre><code class="bash"><strong>[m107:~]$ qstat</strong>
+job-ID  prior   name       user    state  submit/start at      queue             slots ja-task-ID 
+-------------------------------------------------------------------------------------------------
+1113431 0.00000 hello_you. bredin  qw     11/21/2012 12:14:11                        1
+</code></pre>
+        </li>
+        <li>
+            <p><strong>You</strong>: "What's up?"</br>
+            <strong>Scheduler</strong>: "Your job is running on host h-0-1."</p>
+            <pre><code class="bash"><strong>[m107:~]$ qstat</strong>
+job-ID  prior   name       user    state  submit/start at      queue             slots ja-task-ID 
+-------------------------------------------------------------------------------------------------
+1113431 0.00000 hello_you. bredin  r      11/21/2012 12:14:20  all.q@h-0-1.local     1
+</code></pre>
+        </li>
+</ul>
+</section>
+
+<section class="slide" id="qhost">
+    <h2>Queue & Host</h2>
+    <p>By default, scheduler uses <code>all.q</code> queue and tries to balance host loads.</p>
+       <ul>
+           <li>Obtain information on hosts and queues</li>
+               <pre><code class="bash"><strong>[m107:~]$ qhost -q</strong>
+HOSTNAME                ARCH         NCPU  LOAD  MEMTOT  MEMUSE  SWAPTO  SWAPUS
+-------------------------------------------------------------------------------
+h-0-0                   lx26-amd64      8  4.08   15.7G    3.6G  996.2M  148.0K
+   interactive.q        IP    0/0/8
+   all.q                BP    0/4/8 
+h-0-1                   lx26-amd64      8  5.07   15.7G    4.3G  996.2M   23.1M
+   all.q                BP    0/5/8     
+h-0-32                  lx26-amd64     12  0.03   47.2G  336.7M   46.9G   24.7M
+   48giga.q             BIP   0/0/12 
+h-0-33                  lx26-amd64     12  0.00   47.2G   87.5M  996.2M     0.0
+   48giga.q             BIP   0/0/12 
+</pre></code>
+           <li>Choose a better suited queue
+               <pre><code class="bash">[m107:~]$ qsub -q 48giga.q ...</pre></code>
+           </li>
+           <li>Run on a specific host
+               <pre><code class="bash">[m107:~]$ qsub -q 48giga.q@h-0-35 ...</pre></code>
+           </li>
+       </ul>
 </section>
 
 <section class="slide" id="qstat">
-    <h2>Checking output </h2>
+    <h2>What is going on with my job?</h2>
+    <h3>qstat</h3>
+        <p>Get information about a given job</p>
+        <pre><code class="bash">[m107:~]$ qstat -j ${JOB_ID}</code></pre>
+        <p>Get the list of all jobs (from any user)</p>
+        <pre><code class="bash">[m107:~]$ qstat -f -u "*"</code></pre>
+    <h3>stdout/stderr</h3>
+    <p>By default, <code>stdout</code> is redirected to <code>$HOME/${JOB_NAME}.o${JOB_ID}</code> and <code>stderr</code> to <code>$HOME/${JOB_NAME}.e${JOB_ID}</code>
+        </p>
+        <p>The default directory (<code>$HOME</code>) can be modified:</p>
+           <pre><code class="bash">[m107:~]$ qsub <strong>-o /path/for/stdout/ -e /path/for/stderr/</strong> ...</code></pre>
+           <p><code>stdout</code> and <code>stderr</code> can be merged:</p>
+           <pre><code class="bash">[m107:~]$ qsub <strong>-o /path/for/stdout/ -j y</strong> ...</code></pre>
+        
+        
 </section>
 
 <section class="slide" id="qdel">
-    <h2>Killing a job</h2>
+    <h2>Killing/modifying a job</h2>
+    <h3>qdel</h3>
+        <pre><code class="bash">$ qdel 1113431</code></pre>
+        <ul>
+            <li>If job <code>#1113431</code> is running, it is killed.</li>
+            <li>If it is waiting in a queue, it is canceled and removed from the queue.</li>
+        </ul>
+    <h3>qalter</h3>
+    <ul>
+        <li>
+            <pre><code class="bash">$ qalter -p -100 1113431</code></pre>
+            <p>Decrease priority for job <code>#1113431</code>.<br/>
+            (Only privileged users can increase job priority.)</p>
+        </li>
+        <li>
+            <pre><code class="bash">$ qalter -N my_new_name 1113431</code></pre>
+            <p>Rename job <code>#1113431</code>.<br/>
+            (Only privileged users can increase job priority.)</p>
+        </li>
+    </ul>
 </section>
+
 
 <section class="slide" id="array">
-    <h2>Job array</h2>
-    <pre><code class="bash"># array.sh
-echo "I am task of job " $SGE_JOB_ID</code></pre>
+    <h2>Use case 1: parameter tuning</h2>
+    <p>The same job should be run multiple times with different parameters</p>
+    <h3>The bad way, or <em>"take that, scheduler!"</em></h3>
+    <pre><code class="bash">[m107:~]$ for param in {1 .. 10000};
+do
+  qsub my_job.sh $param;
+done</code></pre>
+    <h3>The right way, or <em>job arrays</em></h3>
+    <pre><code class="bash">[m107:~]$ qsub -S /bin/bash <strong>-t 1-10000</strong> array.sh</code></pre>
+    <pre><code class="bash">#!/bin/bash
+echo "This is task ${SGE_TASK_ID} of job ${JOB_ID}."</code></pre>
+    <h3>The responsible way</h3>
+    <p>Limit the number of concurrent jobs</p>
+    <pre><code class="bash">[m107:~]$ qsub <strong>-tc 20</strong> -t 1-10000 array.sh</code></pre>
 </section>
 
-<section class="slide" id="qalter">
-    <h2>Modifying a job</h2>
+
+<section class="slide" id="array">
+    <h2>Use case 2: job dependencies</h2>
+    <p>One job takes the output of another job as input.</p>
+    <h3>The anxious way, or <em>"qstat, qstat, qstat"</em></h3>
+    <pre><code class="bash">[m107:~]$ qsub -S /bin/bash first_job.sh
+[m107:~]$ qstat
+[m107:~]$ qstat
+[m107:~]$ qstat
+[m107:~]$ ...
+[m107:~]$ qstat # until first job is complete
+[m107:~]$ qsub -S /bin/bash second_job.sh
+</code></pre>
+    <h3>A possible way, or <em>"send me an email when you're done"</em></h3>
+    <pre><code class="bash">[m107:~]$ qsub <strong>-M bredin@limsi.fr -m e</strong> -S /bin/bash first_job.sh</code></pre>
+    <h3>The right way, or <em>"job dependencies"</em></h3>
+    <pre><code class="bash">[m107:~]$ qsub <strong>-N first_job</strong> -S /bin/bash first_job.sh
+[m107:~]$ qsub <strong>-hold_jid first_job</strong> -S /bin/bash second_job.sh</code></pre>
+</code></pre>
+
 </section>
+
 
 <section class="slide" id="hold_jid">
     <h2>Job dependencies and priorities</h2>
@@ -126,6 +266,23 @@ echo "I am task of job " $SGE_JOB_ID</code></pre>
     <h2>Binary, Python or else?</h2>
     <pre><code class="bash">$ qsub -b y /bin/date</code></pre>
     <pre><code class="bash">$ qsub -S /path/to/python job.py</code></pre>
+</section>
+
+<section class="slide" id="qconf">
+    <h2>qconf</h2>
+    <ul>
+        <li>
+            <p>List of execution hosts</p>
+            <pre><code class="bash">$ qconf -sel </code></pre>
+            <p>More information about a host</p>
+            <pre><code class="bash">$ qconf -se h-0-0 </code></pre>
+        </li>
+        <li>
+            <p>List of queues</p>
+            <pre><code class="bash">$ qconf -sql </code></pre>
+            <p>More information about a queue</p>
+            <pre><code class="bash">$ qconf -sq all.q </code></pre>
+        </li>
 </section>
 
 
