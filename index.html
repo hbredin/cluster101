@@ -61,17 +61,55 @@
     <h1>What is it?</h1>
 </section>
 
+<section class="slide" id="what-it-does">
+    <h2>What it does</h2>
+    
+    <p>accepts, schedules, dispatches and manages the remote execution of user jobs</p>
+    
+    <h3>Scheduling</h3>
+    <ul>
+        <li>Smart queues</li>
+        <li>Job dependencies</li>
+        <li>Priorities</li>
+    </ul>
+    
+    <h3>Dispatching</h3>
+    <ul>
+        <li>Balance load of execution hosts (avoid overloads)</li>
+        <li>Make sure your job has access to resources you asked for
+            <ul>
+                <li>memory</li>
+                <li>CPU</li>
+            </ul>
+        </li>
+    </ul>
+
+</section>
+
 <section class="slide" id="cluster">
     <h2>Scheduler and execution hosts</h2>
     <img src="images/cluster.png" width=60%>
 </section>
 
-<section class="slide" id="what-it-does">
-    <h2>What it does</h2>
-</section>
 
 <section class="slide" id="what-it-is-does-not-do">
     <h2>What it does not do</h2>
+        <h3>Parallelize your jobs</h3>
+        <ul>
+            <li>No magic</li>
+            <li>You have to do the hard parallelization work
+                <ul>
+                    <li>(if you want to)</li>
+                </ul>
+            </li>
+        </ul>
+        <section class="slide">
+        <h3>Coffee</h3>
+        <ul>
+            <li>I could not think of any other limitation</li>
+            <li>Sorry about that :/</li>
+        </ul>
+        </section>
 </section>
 
 <section class="slide" id="">
@@ -91,6 +129,12 @@ Your job 1113431 ("hello_world.sh") has been submitted</code></pre>
             <pre><code class="bash"><strong>$ cat ~/hello_world.sh.o1113431</strong>
 Hello world!</code></pre>
         </li>
+    </ul>
+</section>
+        
+<section class="slide" id="qsub-2">
+    <h2>Submitting a job (2)</h2>
+    <ul>
         <li>
             <h3>... with arguments</h3>
             <pre><code class="bash">#!/bin/bash
@@ -114,6 +158,12 @@ Hello Hervé</code></pre>
             <p><strong>Scheduler</strong>: "Got it. I put it in the queue."</p>
             <pre><code class="no-highlight">Your job 1113431 ("hello_world.sh") has been submitted</code></pre>
         </li>
+    </ul>
+</section>
+
+<section class="slide" id="qsub-details-2">
+    <h2>What just happened? (2)</h2>
+    <ul>
         <li>
             <p><strong>You</strong>: "Tell me more."</br>
             <strong>Scheduler</strong>: "Your job is waiting in the queue. I will launch it as soon as possible."</p>
@@ -136,7 +186,7 @@ job-ID  prior   name       user    state  submit/start at      queue            
 </section>
 
 <section class="slide" id="configuration">
-    <h2>One installation to rule them all</h2>
+    <h2>One compilation to rule them all</h2>
     <h3>System clones</h3>
     <ul>
         <li>Same operating system</li>
@@ -145,8 +195,8 @@ job-ID  prior   name       user    state  submit/start at      queue            
     </ul>
     <h3>Compile once</h3>
     <ul>
-        <li>... and it should work on every host</li>
-        <li>Queue <code><strong>interactive.q</strong></code> is dedicated to compilation and quick test
+        <li>... and it works on every host</li>
+        <li>Queue <code><strong>interactive.q</strong></code> is dedicated to compilation and quick test</br></br>
         <pre><code class="no-highlight"><strong>[m107:~]$ qlogin -q interactive.q</strong>
 Your job 1113695 ("QLOGIN") has been submitted
 waiting for interactive job to be scheduled ...
@@ -154,7 +204,9 @@ Your interactive job 1113695 has been successfully scheduled.
 Establishing builtin session to host h-0-0.local ...
 </code></pre>
 <pre><code class="no-highlight"><strong>[h-0-0:~]$ cd source</strong>
+<strong>[h-0-0:source]$ ./configure --prefix=$HOME/usr/local/</strong>
 <strong>[h-0-0:source]$ make</strong>
+<strong>[h-0-0:source]$ make install</strong>
 </code></pre>
         </li>
     </ul>
@@ -194,6 +246,9 @@ h-0-33                  lx26-amd64     12  0.00   47.2G   87.5M  996.2M     0.0
         <pre><code class="bash">[m107:~]$ qstat -j ${JOB_ID}</code></pre>
         <p>Get the list of all jobs (from any user)</p>
         <pre><code class="bash">[m107:~]$ qstat -f -u "*"</code></pre>
+</section>
+<section class="slide" id="stdout">
+    <h2>What is going on with my job? (2)</h2>
     <h3>stdout/stderr</h3>
     <p>By default, <code>stdout</code> is redirected to <code>$HOME/${JOB_NAME}.o${JOB_ID}</code> and <code>stderr</code> to <code>$HOME/${JOB_NAME}.e${JOB_ID}</code>
         </p>
@@ -201,8 +256,7 @@ h-0-33                  lx26-amd64     12  0.00   47.2G   87.5M  996.2M     0.0
            <pre><code class="bash">[m107:~]$ qsub <strong>-o /path/for/stdout/ -e /path/for/stderr/</strong> ...</code></pre>
            <p><code>stdout</code> and <code>stderr</code> can be merged:</p>
            <pre><code class="bash">[m107:~]$ qsub <strong>-o /path/for/stdout/ -j y</strong> ...</code></pre>
-        
-        
+
 </section>
 
 <section class="slide" id="qdel">
@@ -222,8 +276,7 @@ h-0-33                  lx26-amd64     12  0.00   47.2G   87.5M  996.2M     0.0
         </li>
         <li>
             <pre><code class="bash">$ qalter -N my_new_name 1113431</code></pre>
-            <p>Rename job <code>#1113431</code>.<br/>
-            (Only privileged users can increase job priority.)</p>
+            <p>Rename job <code>#1113431</code></p>
         </li>
     </ul>
 </section>
@@ -238,7 +291,7 @@ h-0-33                  lx26-amd64     12  0.00   47.2G   87.5M  996.2M     0.0
     <h3>The bad way, or <em>"take that, scheduler!"</em></h3>
     <pre><code class="bash">[m107:~]$ for param in {1 .. 10000};
 do
-  qsub my_job.sh $param;
+  qsub -S /bin/bash param.sh $param;
 done</code></pre>
     <h3>The right way, or <em>job arrays</em></h3>
     <pre><code class="bash">[m107:~]$ qsub -S /bin/bash <strong>-t 1-10000</strong> array.sh</code></pre>
@@ -246,11 +299,11 @@ done</code></pre>
 echo "This is task ${SGE_TASK_ID} of job ${JOB_ID}."</code></pre>
     <h3>The responsible way</h3>
     <p>Limit the number of concurrent jobs</p>
-    <pre><code class="bash">[m107:~]$ qsub <strong>-tc 20</strong> -t 1-10000 array.sh</code></pre>
+    <pre><code class="bash">[m107:~]$ qsub -S /bin/bash <strong>-tc 20</strong> -t 1-10000 array.sh</code></pre>
 </section>
 
 
-<section class="slide" id="array">
+<section class="slide" id="dependencies">
     <h2>Use case 2: job dependencies</h2>
     <p>One job takes the output of another job as input.</p>
     <h3>The anxious way, or <em>"qstat, qstat, qstat"</em></h3>
@@ -271,37 +324,86 @@ echo "This is task ${SGE_TASK_ID} of job ${JOB_ID}."</code></pre>
 </section>
 
 <section class="slide" id="">
-    <h1>Advanced usage</h1>
+    <h1>Advanced use</h1>
 </section>
 
 <section class="slide" id="parallel">
-    <h2>Parallelized jobs</h2>
+    <h2>Parallel jobs</h2>
+    <p>If your job is <strong>multi-threaded</strong>, you <strong>must </strong> tell the scheduler:</p>
     <pre><code class="bash">$ qsub -pe threaded 4 parallel.sh</code></pre>
+    <ul>
+        <li>The job will be sent to execution hosts where at least 4 cores are available</li>
+        <li>Other jobs won't try and steal those cores from you</li>
+    </ul>
+    <p>Other parallel environments (-pe) are available</p>
+    <ul>
+        <li>MPI</li>
+        <li>Never used it, not sure how it works</li>
+    </ul>
 </section>
 
-<section class="slide" id="not_bash">
-    <h2>Binary, Python or else?</h2>
-    <pre><code class="bash">$ qsub -b y /bin/date</code></pre>
-    <pre><code class="bash">$ qsub -S /path/to/python job.py</code></pre>
+<section class="slide" id="qsub-options">
+    <h2>Useful qsub options</h2>
+    <h3>Job name</h3>
+        <pre><code class="bash">[m107:~]$ qsub -N a_better_name no_name.sh</code></pre>
+        <p>This new name can then be used to identify this job</p>
+        <pre><code class="bash">[m107:~]$ qdel a_better_name
+$[m107:~]$ qsub -hold_jid a_better_name ...</code></pre>
+    <h3>Run a binary executable</h3>
+    <pre><code class="bash">[m107:~]$ qsub -b y /bin/date</code></pre>
+    <ul>
+        <li>Absolute path to binary executable</li>
+</section>
+
+<section class="slide" id="qsub-options-2">
+    <h2>Useful qsub options (2)</h2>
+    <h3>Environment variables</h3>
+        <p>Transmit one particular environment variable</p>
+        <pre><code class="bash">[m107:~]$ export VARIABLE="Cluster rules"
+[m107:~]$ qsub -v VARIABLE -S /bin/bash env.sh</code></pre>
+        <p>Transmit all environment variables</p>
+        <pre><code class="bash">[m107:~]$ qsub -V -S /bin/bash env.sh</code></pre>
+</section>
+
+
+<section class="slide" id="qsub-options-infile">
+    <h2>In-file qsub options</h2>
+    <p>Options can be directly read from the script file</p>
+    <pre><code>#!/bin/bash
+
+#$ -N my_super_name
+#$ -S /bin/bash
+#$ -o /path/to/logs/
+#$ -j y
+#$ -pe threaded 12
+
+sleep 10</code></pre>
 </section>
 
 <section class="slide" id="qconf">
     <h2>qconf</h2>
     <ul>
         <li>
-            <p>List of execution hosts</p>
+            <p>Show list of execution hosts</p>
             <pre><code class="bash">$ qconf -sel </code></pre>
             <p>More information about a host</p>
             <pre><code class="bash">$ qconf -se h-0-0 </code></pre>
         </li>
         <li>
-            <p>List of queues</p>
+            <p>Show list of queues</p>
             <pre><code class="bash">$ qconf -sql </code></pre>
             <p>More information about a queue</p>
             <pre><code class="bash">$ qconf -sq all.q </code></pre>
         </li>
+        <li>
+            <pre><code class="bash">$ qconf -h</code></pre>
+        </li>
+    </ul>
 </section>
 
+<section class="slide" id="qconf">
+    <h1>ssh m107</h1>
+</section>
 
 <!-- deck.navigation snippet -->
 <a href="#" class="deck-prev-link" title="Previous">&#8592;</a>
