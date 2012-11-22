@@ -357,6 +357,11 @@ $[m107:~]$ qsub -hold_jid a_better_name ...</code></pre>
 
 <section class="slide" id="qsub-options-2">
     <h2>Useful qsub options (2)</h2>
+    <h3>Memory</h3>
+        <pre><code class="bash">$ qsub -l mem=1G job.sh</code></pre>
+        <ul>
+            <li>The job will be sent to execution hosts with at least 1 gigabyte of RAM available</li>
+        </ul>
     <h3>Environment variables</h3>
         <p>Transmit one particular environment variable</p>
         <pre><code class="bash">[m107:~]$ export VARIABLE="Cluster rules"
