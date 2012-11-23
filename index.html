@@ -406,6 +406,58 @@ sleep 10</code></pre>
     </ul>
 </section>
 
+<section class="slide" id="specific">
+    <h1>Specific use</h1>
+</section>
+
+<section class="slide" id="sequential1">
+    <h2>Sequential jobs</h2>
+    <p>Suppose you have a huge graph to explore and for each transition between two nodes, you have a long computation to make</p>
+    <ul>
+        <li>Unfeasible to compute every transition...</li>
+        <li>...but you cannot use job dependencies since you don't know where you're headed in the first place!</li>
+    </ul>
+    <h3><em>&rarr; You need some kind of reporting to know what's the next step</em></h3>
+</section>
+
+<section class="slide" id="sequential2">
+    <h2>Sequential jobs 2</h2>
+    <h3>Small model of communication using sockets between the master and the nodes of the cluster</h3>
+    <ul>
+        <li>one server running on the master, accepting incoming connections from...
+        <li>...clients on the nodes to report back results</li>
+    </ul>
+    <h3><em>Implemented in Python, two files, very simple to use.</em></h3>
+    <img src="images/schema_communication.png" width=40%>
+</section>
+
+<section class="slide" id="sequential3">
+    <h2>Sequential jobs 3</h2>
+    <h3>Client-side code</h3>
+    <pre><code class="python">#! /usr/bin/python
+# -*- coding: UTF-8 -*-
+
+import socket
+import time
+import random
+
+def report_results(results, master_address, listening_port):
+    # Communicate
+    buf=1024
+    address= (master_address, listening_port)
+    sock = socket.socket()
+    while 1:
+        try :
+            sock.connect(address)
+            sock.send(str(results))
+            sock.close()
+            break
+        except :
+            time.sleep(5.0 * random.random())</code></pre>
+
+
+</section>
+
 <section class="slide" id="qconf">
     <h1>ssh m107</h1>
 </section>
