@@ -7,7 +7,7 @@
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 	
-	<title>Getting Started with deck.js</title>
+	<title>Cluster 101</title>
 	
 	<meta name="description" content="A jQuery library for modern HTML presentations">
 	<meta name="author" content="Caleb Troughton">
@@ -404,6 +404,76 @@ sleep 10</code></pre>
             <pre><code class="bash">$ qconf -h</code></pre>
         </li>
     </ul>
+</section>
+
+<section class="slide" id="specific">
+    <h1>Specific use</h1>
+</section>
+
+<section class="slide" id="sequential1">
+    <h2>Sequential jobs</h2>
+    <p>Suppose you have a huge graph to explore and for each transition between two nodes, you have a long computation to make</p>
+    <ul>
+        <li>Unfeasible to compute every transition...</li>
+        <li>...but you cannot use job dependencies since you don't know where you're headed in the first place!</li>
+    </ul>
+    <h3><em>&rarr; You need some kind of reporting to know what's the next step</em></h3>
+</section>
+
+<section class="slide" id="sequential2">
+    <h2>Sequential jobs 2</h2>
+    <h3>Small model of communication using sockets between the master and the nodes of the cluster</h3>
+    <ul>
+        <li>one server running on the master, accepting incoming connections from...
+        <li>...clients on the nodes to report back results</li>
+        <li>uses job arrays and a file to communicate parameters</li>
+    </ul>
+    <h3><em>Implemented in Python, two scripts, (quite) simple to use.</em></h3>
+    <img src="images/schema_communication.png" width=40%>
+</section>
+
+<section class="slide" id="sequential3">
+    <h2>Sequential jobs 3 - Server-side code</h2>
+    <h3>Put job parameters in a Queue</h3>
+    <pre><code class="python">import Queue
+
+job_queue = Queue.Queue(0)
+for param_value in range(0, 10):
+    job_queue.put(param_value)</code></pre>
+    <h3>Call the function to launch the jobs</h3>
+    <pre><code class="python">results_queue = cluster_master_job_array.launch_jobs(job_queue,
+                                                         local_script_name,
+                                                         local_stderr_file,
+                                                         local_stdout_file)</code></pre>
+    <h3>You're done!</h3>
+</section>
+
+<section class="slide" id="sequential4">
+    <h2>Sequential jobs 4 - Client-side code</h2>
+    <h3>Get your parameters from the parameters file</h3>
+    <pre><code class="python"># Get parameters from file
+while True:
+    try:
+        parameters = open(sys.argv[1]).readlines()[int(os.environ.get('SGE_TASK_ID')) - 1].strip().split()
+        break
+    except:
+        time.sleep(3*random.random() + 1)
+
+# Parameters to use cluster_slave package: parameters[:3] (too long for this slide...)
+
+# Get your parameters
+your_stuff = parameters[3:]</code></pre>
+    <h3>Pack your results in a container (dict, object...) and report it back</h3>
+    <pre><code class="python">cluster_slave.report_results(results, master_ip, listening_port)</code></pre>
+    <h3>You're done!</h3>
+</section>
+
+<section class="slide" id="sequential5">
+    <h2>Sequential jobs 5</h2>
+    <h3>Adaptating it to your own code</h3>
+    <p>Not much work <em>but</em> currently parameters file is an argument of the script to be launched... not very practical. A better way: create an environment variable?</p>
+    <h3>Need help?</h3>
+    <p>Just ask Clément &#x263A</p>
 </section>
 
 <section class="slide" id="qconf">
