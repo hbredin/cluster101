@@ -7,7 +7,7 @@
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 	
-	<title>Getting Started with deck.js</title>
+	<title>Cluster 101</title>
 	
 	<meta name="description" content="A jQuery library for modern HTML presentations">
 	<meta name="author" content="Caleb Troughton">
@@ -124,7 +124,7 @@
             <h3>Hello world!</h3>
             <pre><code class="bash">#!/bin/bash
 echo "Hello world!"</code></pre>
-            <pre><code class="bash"><strong>[m107:~]$ qsub -S /bin/bash hello_world.sh</strong>
+            <pre><code class="bash"><strong>[m107:~]$ qsub hello_world.sh</strong>
 Your job 1113431 ("hello_world.sh") has been submitted</code></pre>
             <pre><code class="bash"><strong>$ cat ~/hello_world.sh.o1113431</strong>
 Hello world!</code></pre>
@@ -139,7 +139,7 @@ Hello world!</code></pre>
             <h3>... with arguments</h3>
             <pre><code class="bash">#!/bin/bash
 echo "Hello" $1</code></pre>
-            <pre><code class="bash"><strong>[m107:~]$ qsub -S /bin/bash hello_you.sh Hervé</strong>
+            <pre><code class="bash"><strong>[m107:~]$ qsub hello_you.sh Hervé</strong>
 Your job 1113442 ("hello_you.sh") has been submitted</code></pre>
             <pre><code class="bash"><strong>$ cat ~/hello_you.sh.o1113442</strong>
 Hello Hervé</code></pre>
@@ -152,7 +152,7 @@ Hello Hervé</code></pre>
     <ul>
         <li>
             <p><strong>You</strong>: "Please, run this script."</p>
-            <pre><code class="bash"><strong>[m107:~]$ qsub -S /bin/bash hello_world.sh</strong></code></pre>
+            <pre><code class="bash"><strong>[m107:~]$ qsub hello_world.sh</strong></code></pre>
         </li>
         <li>
             <p><strong>Scheduler</strong>: "Got it. I put it in the queue."</p>
@@ -289,17 +289,17 @@ h-0-33                  lx26-amd64     12  0.00   47.2G   87.5M  996.2M     0.0
     <h2>Use case 1: parameter tuning</h2>
     <p>The same job should be run multiple times with different parameters</p>
     <h3>The bad way, or <em>"take that, scheduler!"</em></h3>
-    <pre><code class="bash">[m107:~]$ for param in {1 .. 10000};
+    <pre><code class="bash">[m107:~]$ for param in {1..10000};
 do
-  qsub -S /bin/bash param.sh $param;
+  qsub param.sh $param;
 done</code></pre>
     <h3>The right way, or <em>job arrays</em></h3>
-    <pre><code class="bash">[m107:~]$ qsub -S /bin/bash <strong>-t 1-10000</strong> array.sh</code></pre>
+    <pre><code class="bash">[m107:~]$ qsub <strong>-t 1-10000</strong> array.sh</code></pre>
     <pre><code class="bash">#!/bin/bash
 echo "This is task ${SGE_TASK_ID} of job ${JOB_ID}."</code></pre>
     <h3>The responsible way</h3>
     <p>Limit the number of concurrent jobs</p>
-    <pre><code class="bash">[m107:~]$ qsub -S /bin/bash <strong>-tc 20</strong> -t 1-10000 array.sh</code></pre>
+    <pre><code class="bash">[m107:~]$ qsub <strong>-tc 20</strong> -t 1-10000 array.sh</code></pre>
 </section>
 
 
@@ -307,19 +307,19 @@ echo "This is task ${SGE_TASK_ID} of job ${JOB_ID}."</code></pre>
     <h2>Use case 2: job dependencies</h2>
     <p>One job takes the output of another job as input.</p>
     <h3>The anxious way, or <em>"qstat, qstat, qstat"</em></h3>
-    <pre><code class="bash">[m107:~]$ qsub -S /bin/bash first_job.sh
+    <pre><code class="bash">[m107:~]$ qsub first_job.sh
 [m107:~]$ qstat
 [m107:~]$ qstat
 [m107:~]$ qstat
 [m107:~]$ ...
 [m107:~]$ qstat # until first job is complete
-[m107:~]$ qsub -S /bin/bash second_job.sh
+[m107:~]$ qsub second_job.sh
 </code></pre>
     <h3>A possible way, or <em>"send me an email when you're done"</em></h3>
-    <pre><code class="bash">[m107:~]$ qsub <strong>-M bredin@limsi.fr -m e</strong> -S /bin/bash first_job.sh</code></pre>
+    <pre><code class="bash">[m107:~]$ qsub <strong>-M bredin@limsi.fr -m e</strong> first_job.sh</code></pre>
     <h3>The right way, or <em>"job dependencies"</em></h3>
-    <pre><code class="bash">[m107:~]$ qsub <strong>-N first_job</strong> -S /bin/bash first_job.sh
-[m107:~]$ qsub <strong>-hold_jid first_job</strong> -S /bin/bash second_job.sh</code></pre>
+    <pre><code class="bash">[m107:~]$ qsub <strong>-N first_job</strong> first_job.sh
+[m107:~]$ qsub <strong>-hold_jid first_job</strong> second_job.sh</code></pre>
 </code></pre>
 </section>
 
@@ -365,9 +365,9 @@ $[m107:~]$ qsub -hold_jid a_better_name ...</code></pre>
     <h3>Environment variables</h3>
         <p>Transmit one particular environment variable</p>
         <pre><code class="bash">[m107:~]$ export VARIABLE="Cluster rules"
-[m107:~]$ qsub -v VARIABLE -S /bin/bash env.sh</code></pre>
+[m107:~]$ qsub -v VARIABLE env.sh</code></pre>
         <p>Transmit all environment variables</p>
-        <pre><code class="bash">[m107:~]$ qsub -V -S /bin/bash env.sh</code></pre>
+        <pre><code class="bash">[m107:~]$ qsub -V env.sh</code></pre>
 </section>
 
 
@@ -404,6 +404,76 @@ sleep 10</code></pre>
             <pre><code class="bash">$ qconf -h</code></pre>
         </li>
     </ul>
+</section>
+
+<section class="slide" id="specific">
+    <h1>Specific use</h1>
+</section>
+
+<section class="slide" id="sequential1">
+    <h2>Sequential jobs</h2>
+    <p>Suppose you have a huge graph to explore and for each transition between two nodes, you have a long computation to make</p>
+    <ul>
+        <li>Unfeasible to compute every transition...</li>
+        <li>...but you cannot use job dependencies since you don't know where you're headed in the first place!</li>
+    </ul>
+    <h3><em>&rarr; You need some kind of reporting to know what's the next step</em></h3>
+</section>
+
+<section class="slide" id="sequential2">
+    <h2>Sequential jobs 2</h2>
+    <h3>Small model of communication using sockets between the master and the nodes of the cluster</h3>
+    <ul>
+        <li>one server running on the master, accepting incoming connections from...
+        <li>...clients on the nodes to report back results</li>
+        <li>uses job arrays and a file to communicate parameters</li>
+    </ul>
+    <h3><em>Implemented in Python, two scripts, (quite) simple to use.</em></h3>
+    <img src="images/schema_communication.png" width=40%>
+</section>
+
+<section class="slide" id="sequential3">
+    <h2>Sequential jobs 3 - Server-side code</h2>
+    <h3>Put job parameters in a Queue</h3>
+    <pre><code class="python">import Queue
+
+job_queue = Queue.Queue(0)
+for param_value in range(0, 10):
+    job_queue.put(param_value)</code></pre>
+    <h3>Call the function to launch the jobs</h3>
+    <pre><code class="python">results_queue = cluster_master_job_array.launch_jobs(job_queue,
+                                                         local_script_name,
+                                                         local_stderr_file,
+                                                         local_stdout_file)</code></pre>
+    <h3>You're done!</h3>
+</section>
+
+<section class="slide" id="sequential4">
+    <h2>Sequential jobs 4 - Client-side code</h2>
+    <h3>Get your parameters from the parameters file</h3>
+    <pre><code class="python"># Get parameters from file
+while True:
+    try:
+        parameters = open(sys.argv[1]).readlines()[int(os.environ.get('SGE_TASK_ID')) - 1].strip().split()
+        break
+    except:
+        time.sleep(3*random.random() + 1)
+
+# Parameters to use cluster_slave package: parameters[:3] (too long for this slide...)
+
+# Get your parameters
+your_stuff = parameters[3:]</code></pre>
+    <h3>Pack your results in a container (dict, object...) and report it back</h3>
+    <pre><code class="python">cluster_slave.report_results(results, master_ip, listening_port)</code></pre>
+    <h3>You're done!</h3>
+</section>
+
+<section class="slide" id="sequential5">
+    <h2>Sequential jobs 5</h2>
+    <h3>Adapting it to your own code</h3>
+    <p>Not much work <em>but</em> currently parameters file is an argument of the script to be launched... not very practical. A better way: create an environment variable?</p>
+    <h3>Need help?</h3>
+    <p>Just ask Clément &#x263A</p>
 </section>
 
 <section class="slide" id="qconf">
