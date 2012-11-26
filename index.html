@@ -124,7 +124,7 @@
             <h3>Hello world!</h3>
             <pre><code class="bash">#!/bin/bash
 echo "Hello world!"</code></pre>
-            <pre><code class="bash"><strong>[m107:~]$ qsub -S /bin/bash hello_world.sh</strong>
+            <pre><code class="bash"><strong>[m107:~]$ qsub hello_world.sh</strong>
 Your job 1113431 ("hello_world.sh") has been submitted</code></pre>
             <pre><code class="bash"><strong>$ cat ~/hello_world.sh.o1113431</strong>
 Hello world!</code></pre>
@@ -139,7 +139,7 @@ Hello world!</code></pre>
             <h3>... with arguments</h3>
             <pre><code class="bash">#!/bin/bash
 echo "Hello" $1</code></pre>
-            <pre><code class="bash"><strong>[m107:~]$ qsub -S /bin/bash hello_you.sh Hervé</strong>
+            <pre><code class="bash"><strong>[m107:~]$ qsub hello_you.sh Hervé</strong>
 Your job 1113442 ("hello_you.sh") has been submitted</code></pre>
             <pre><code class="bash"><strong>$ cat ~/hello_you.sh.o1113442</strong>
 Hello Hervé</code></pre>
@@ -152,7 +152,7 @@ Hello Hervé</code></pre>
     <ul>
         <li>
             <p><strong>You</strong>: "Please, run this script."</p>
-            <pre><code class="bash"><strong>[m107:~]$ qsub -S /bin/bash hello_world.sh</strong></code></pre>
+            <pre><code class="bash"><strong>[m107:~]$ qsub hello_world.sh</strong></code></pre>
         </li>
         <li>
             <p><strong>Scheduler</strong>: "Got it. I put it in the queue."</p>
@@ -289,17 +289,17 @@ h-0-33                  lx26-amd64     12  0.00   47.2G   87.5M  996.2M     0.0
     <h2>Use case 1: parameter tuning</h2>
     <p>The same job should be run multiple times with different parameters</p>
     <h3>The bad way, or <em>"take that, scheduler!"</em></h3>
-    <pre><code class="bash">[m107:~]$ for param in {1 .. 10000};
+    <pre><code class="bash">[m107:~]$ for param in {1..10000};
 do
-  qsub -S /bin/bash param.sh $param;
+  qsub param.sh $param;
 done</code></pre>
     <h3>The right way, or <em>job arrays</em></h3>
-    <pre><code class="bash">[m107:~]$ qsub -S /bin/bash <strong>-t 1-10000</strong> array.sh</code></pre>
+    <pre><code class="bash">[m107:~]$ qsub <strong>-t 1-10000</strong> array.sh</code></pre>
     <pre><code class="bash">#!/bin/bash
 echo "This is task ${SGE_TASK_ID} of job ${JOB_ID}."</code></pre>
     <h3>The responsible way</h3>
     <p>Limit the number of concurrent jobs</p>
-    <pre><code class="bash">[m107:~]$ qsub -S /bin/bash <strong>-tc 20</strong> -t 1-10000 array.sh</code></pre>
+    <pre><code class="bash">[m107:~]$ qsub <strong>-tc 20</strong> -t 1-10000 array.sh</code></pre>
 </section>
 
 
@@ -307,19 +307,19 @@ echo "This is task ${SGE_TASK_ID} of job ${JOB_ID}."</code></pre>
     <h2>Use case 2: job dependencies</h2>
     <p>One job takes the output of another job as input.</p>
     <h3>The anxious way, or <em>"qstat, qstat, qstat"</em></h3>
-    <pre><code class="bash">[m107:~]$ qsub -S /bin/bash first_job.sh
+    <pre><code class="bash">[m107:~]$ qsub first_job.sh
 [m107:~]$ qstat
 [m107:~]$ qstat
 [m107:~]$ qstat
 [m107:~]$ ...
 [m107:~]$ qstat # until first job is complete
-[m107:~]$ qsub -S /bin/bash second_job.sh
+[m107:~]$ qsub second_job.sh
 </code></pre>
     <h3>A possible way, or <em>"send me an email when you're done"</em></h3>
-    <pre><code class="bash">[m107:~]$ qsub <strong>-M bredin@limsi.fr -m e</strong> -S /bin/bash first_job.sh</code></pre>
+    <pre><code class="bash">[m107:~]$ qsub <strong>-M bredin@limsi.fr -m e</strong> first_job.sh</code></pre>
     <h3>The right way, or <em>"job dependencies"</em></h3>
-    <pre><code class="bash">[m107:~]$ qsub <strong>-N first_job</strong> -S /bin/bash first_job.sh
-[m107:~]$ qsub <strong>-hold_jid first_job</strong> -S /bin/bash second_job.sh</code></pre>
+    <pre><code class="bash">[m107:~]$ qsub <strong>-N first_job</strong> first_job.sh
+[m107:~]$ qsub <strong>-hold_jid first_job</strong> second_job.sh</code></pre>
 </code></pre>
 </section>
 
@@ -365,9 +365,9 @@ $[m107:~]$ qsub -hold_jid a_better_name ...</code></pre>
     <h3>Environment variables</h3>
         <p>Transmit one particular environment variable</p>
         <pre><code class="bash">[m107:~]$ export VARIABLE="Cluster rules"
-[m107:~]$ qsub -v VARIABLE -S /bin/bash env.sh</code></pre>
+[m107:~]$ qsub -v VARIABLE env.sh</code></pre>
         <p>Transmit all environment variables</p>
-        <pre><code class="bash">[m107:~]$ qsub -V -S /bin/bash env.sh</code></pre>
+        <pre><code class="bash">[m107:~]$ qsub -V env.sh</code></pre>
 </section>
 
 
