@@ -88,7 +88,7 @@
 
 <section class="slide" id="cluster">
     <h2>Scheduler and execution hosts</h2>
-    <img src="images/cluster.png" width=60%>
+    <img src="images/cluster.png" width=90%>
 </section>
 
 
@@ -97,17 +97,20 @@
         <h3>Parallelize your jobs</h3>
         <ul>
             <li>No magic</li>
-            <li>You have to do the hard parallelization work
+            <li><strong>You</strong> have to do the hard parallelization work
                 <ul>
                     <li>(if you want to)</li>
                 </ul>
             </li>
         </ul>
         <section class="slide">
-        <h3>Coffee</h3>
+        <h3>Prevent disk access overload</h3>
         <ul>
-            <li>I could not think of any other limitation</li>
-            <li>Sorry about that :/</li>
+            <li>More concurrent jobs = more disk accesses = overall slow-down </li>
+            <li><strong>You</strong> have to optimize Read/Write disk accesses to shared NAS/RAID</li>
+            <ul>
+                <li>(use local temporary directories when possible)</li>
+            </ul>
         </ul>
         </section>
 </section>
